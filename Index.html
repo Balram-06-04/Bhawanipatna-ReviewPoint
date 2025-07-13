@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Bhawanipatna Review Point - Street Food Reviews</title>
+    <style>
+      /* Reset and base */
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #262626;
+        color: #f0f0f0;
+        overflow-y: auto;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+      }
+      a {
+        color: #ff751a;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* Main layout */
+      #app {
+        max-width: 360px;
+        margin: 0 auto;
+        padding: 10px 15px 60px;
+        background: #1a1a1a;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        text-align: center;
+        padding: 10px 0 15px;
+        border-bottom: 2px solid #ff751a;
+      }
+      header h1 {
+        font-weight: 900;
+        font-size: 1.6rem;
+        color: #ff751a;
+        letter-spacing: 2px;
+        user-select: none;
+      }
+      header h2 {
+        font-weight: 400;
+        font-style: italic;
+        font-size: 1rem;
+        color: #ffb366;
+      }
+
+      /* Forms and inputs */
+      form {
+        margin: 15px 0;
+        display: flex;
+        flex-direction: column;
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      textarea,
+      select {
+        background: #333333;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 6px 0 12px;
+        color: #f0f0f0;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+      }
+      input[type="file"] {
+        margin: 6px 0 16px;
+      }
+      textarea {
+        min-height: 70px;
+      }
+      select {
+        cursor: pointer;
+      }
+
+      button {
+        background: #ff751a;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        user-select: none;
+      }
+      button:hover,
+      button:focus {
+        background: #ff9c4d;
+        outline: none;
+      }
+      button:disabled {
+        background: #aa7c4d;
+        cursor: not-allowed;
+      }
+
+      /* Error messages */
+      .error {
+        color: #ff4d4d;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
+
+      /* User info bar */
+      #user-bar {
+        background: #333333;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0 0 0;
+      }
+      #user-bar span {
+        font-weight: 700;
+      }
+      #logout-btn {
+        background: transparent;
+        border: none;
+        color: #ff751a;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0;
+      }
+      #logout-btn:hover {
+        color: #ffb366;
+        text-decoration: underline;
+      }
+
+      /* Reviews list */
+      #reviews-container {
+        flex-grow: 1;
+        margin-top: 10px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 5px;
+      }
+      #reviews-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      #reviews-container::-webkit-scrollbar-track {
+        background: #1a1a1a;
+      }
+      #reviews-container::-webkit-scrollbar-thumb {
+        background: #ff751a;
+        border-radius: 3px;
+      }
+
+      .review-card {
+        background: #333333;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        display: flex;
+        gap: 12px;
+        box-shadow: 0 2px 6px rgb(255 117 26 / 0.6);
+        position: relative;
+      }
+      .review-photo {
+        min-width: 72px;
+        max-width: 72px;
+        height: 72px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid #ff751a;
+        background: #444;
+      }
+      .review-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .review-user {
+        font-weight: 700;
+        color: #ffb366;
+      }
+      .review-rating {
+        color: #ffb366;
+        font-weight: 700;
+        user-select: none;
+      }
+      .review-category {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #ff751a;
+        color: #1a1a1a;
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 3px 7px;
+        border-radius: 12px;
+        user-select: none;
+        text-transform: uppercase;
+      }
+      .category-good {
+        background-color: #28a745;
+        color: #e6f5e9;
+      }
+      .category-average {
+        background-color: #ffc107;
+        color: #3e2e00;
+      }
+      .category-bad {
+        background-color: #dc3545;
+        color: #fce7e8;
+      }
+      .review-text {
+        white-space: pre-wrap;
+        font-size: 0.9rem;
+      }
+      .review-date {
+        margin-top: 5px;
+        font-size: 0.75rem;
+        color: #aaa;
+        user-select: none;
+      }
+
+      /* Stars for rating */
+      .star {
+        color: #ffb366;
+        font-size: 1.15rem;
+        pointer-events: none;
+      }
+
+      /* Search and filter */
+      #search-filter {
+        background: #333333;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      #search-filter > * {
+        font-size: 0.9rem;
+      }
+      #search-text {
+        flex-grow: 1;
+        min-width: 120px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: none;
+        background-color: #444444;
+        color: #fff;
+      }
+      #search-text::placeholder {
+        color: #bbb;
+      }
+      #filter-rating,
+      #filter-category {
+        width: 120px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: none;
+        background-color: #444444;
+        color: #fff;
+        cursor: pointer;
+        text-align-last: center;
+      }
+
+      /* Review form */
+      #review-form-container {
+        background: #222222;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+      #review-form label {
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #ffb366;
+      }
+      #review-form .rating-options {
+        display: flex;
+        gap: 4px;
+      }
+      #review-form .rating-options label {
+        cursor: pointer;
+        font-weight: 700;
+        color: #ff751a;
+      }
+      #review-form textarea {
+        font-size: 1rem;
+      }
+
+      /* Login/Register containers toggle */
+      #auth-container {
+        margin-top: 15px;
+      }
+      #auth-container > div {
+        background: #222222;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+      #toggle-auth {
+        margin-top: 6px;
+        text-align: center;
+      }
+      #toggle-auth button {
+        background: none;
+        border: none;
+        color: #ff751a;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1rem;
+      }
+      #toggle-auth button:hover {
+        text-decoration: underline;
+      }
+
+      /* Responsive */
+      @media (max-width: 400px) {
+        #app {
+          max-width: 100vw;
+          padding: 10px 12px 60px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="app"
+      role="main"
+      aria-label="Bhawanipatna Review Point Street Food Review Platform"
+    >
+      <header>
+        <h1>Bhawanipatna Review Point</h1>
+        <h2>Street Food Review</h2>
+      </header>
+
+      <nav
+        id="user-bar"
+        aria-live="polite"
+        aria-atomic="true"
+        style="display: none"
+      >
+        <span id="welcome-msg"></span>
+        <button id="logout-btn" aria-label="Logout">Logout</button>
+      </nav>
+
+      <section id="auth-container" aria-label="User authentication">
+        <div id="login-section" aria-hidden="false">
+          <h3>Login</h3>
+          <form id="login-form" novalidate>
+            <label for="login-email">Email</label>
+            <input
+              type="email"
+              id="login-email"
+              required
+              autocomplete="username"
+              aria-required="true"
+            />
+            <label for="login-password">Password</label>
+            <input
+              type="password"
+              id="login-password"
+              required
+              autocomplete="current-password"
+              aria-required="true"
+            />
+            <div id="login-error" class="error" aria-live="polite"></div>
+            <button type="submit">Login</button>
+          </form>
+        </div>
+
+        <div id="register-section" aria-hidden="true" style="display: none">
+          <h3>Register</h3>
+          <form id="register-form" novalidate>
+            <label for="register-name">Name</label>
+            <input
+              type="text"
+              id="register-name"
+              required
+              autocomplete="name"
+              aria-required="true"
+              minlength="2"
+              maxlength="30"
+            />
+            <label for="register-email">Email</label>
+            <input
+              type="email"
+              id="register-email"
+              required
+              autocomplete="email"
+              aria-required="true"
+            />
+            <label for="register-password">Password</label>
+            <input
+              type="password"
+              id="register-password"
+              required
+              minlength="6"
+              aria-required="true"
+              autocomplete="new-password"
+            />
+            <div id="register-error" class="error" aria-live="polite"></div>
+            <button type="submit">Register</button>
+          </form>
+        </div>
+
+        <div id="toggle-auth">
+          <button
+            id="show-register-btn"
+            aria-label="Switch to registration form"
+          >
+            Don't have an account? Register
+          </button>
+          <button
+            id="show-login-btn"
+            aria-label="Switch to login form"
+            style="display: none"
+          >
+            Already have an account? Login
+          </button>
+        </div>
+      </section>
+
+      <section
+        id="app-content"
+        style="display: none"
+        aria-label="Main application content"
+      >
+        <section id="review-form-container" aria-label="Add a new review">
+          <h3>Add Your Street Food Review</h3>
+          <form id="review-form" novalidate>
+            <label for="review-text">Review</label>
+            <textarea
+              id="review-text"
+              maxlength="500"
+              placeholder="Share your delicious experience..."
+              required
+              aria-required="true"
+            ></textarea>
+
+            <label for="review-rating">Rating</label>
+            <select
+              id="review-rating"
+              required
+              aria-required="true"
+              aria-label="Select rating"
+            >
+              <option value="" disabled selected>Select rating</option>
+              <option value="5">5 - Excellent</option>
+              <option value="4">4 - Very Good</option>
+              <option value="3">3 - Good</option>
+              <option value="2">2 - Fair</option>
+              <option value="1">1 - Poor</option>
+            </select>
+
+            <label for="review-photo">Upload photo (optional)</label>
+            <input
+              type="file"
+              id="review-photo"
+              accept="image/*"
+              aria-label="Upload a photo related to your review"
+            />
+            <div id="photo-preview-container" aria-live="polite"></div>
+
+            <div id="review-error" class="error" aria-live="polite"></div>
+            <button type="submit">Submit Review</button>
+          </form>
+        </section>
+
+        <section id="search-filter" aria-label="Search and filter reviews">
+          <input
+            type="text"
+            id="search-text"
+            placeholder="Search reviews by text or user"
+            aria-label="Search reviews by text or user"
+          />
+          <select id="filter-rating" aria-label="Filter reviews by rating">
+            <option value="all" selected>All ratings</option>
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
+          </select>
+          <select id="filter-category" aria-label="Filter reviews by category">
+            <option value="all" selected>All categories</option>
+            <option value="good">Good</option>
+            <option value="average">Average</option>
+            <option value="bad">Bad</option>
+          </select>
+        </section>
+
+        <section
+          id="reviews-container"
+          aria-live="polite"
+          aria-label="List of street food reviews"
+        >
+          <!-- Reviews will appear here -->
+        </section>
+      </section>
+    </div>
+    <script>
+        // Get elements
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
+        const reviewForm = document.getElementById("review-form");
+        const authContainer = document.getElementById("auth-container");
+        const appContent = document.getElementById("app-content");
+        const userBar = document.getElementById("user-bar");
+        const welcomeMsg = document.getElementById("welcome-msg");
+        const logoutBtn = document.getElementById("logout-btn");
+        const reviewsContainer = document.getElementById("reviews-container");
+        const loginError = document.getElementById("login-error");
+        const registerError = document.getElementById("register-error");
+        const reviewError = document.getElementById("review-error");
+        const showRegisterBtn = document.getElementById("show-register-btn");
+        const showLoginBtn = document.getElementById("show-login-btn");
+      
+        const searchText = document.getElementById("search-text");
+        const filterRating = document.getElementById("filter-rating");
+        const filterCategory = document.getElementById("filter-category");
+      
+        // LocalStorage keys
+        const USERS_KEY = "users";
+        const REVIEWS_KEY = "reviews";
+        const SESSION_KEY = "session";
+      
+        // Load data
+        let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        let reviews = JSON.parse(localStorage.getItem(REVIEWS_KEY)) || [];
+        let currentUser = JSON.parse(localStorage.getItem(SESSION_KEY)) || null;
+      
+        // Check session
+        if (currentUser) {
+          showApp();
+        }
+      
+        function hashPassword(password) {
+          let hash = 0;
+          for (let i = 0; i < password.length; i++) {
+            hash = (hash << 5) - hash + password.charCodeAt(i);
+            hash |= 0;
+          }
+          return hash;
+        }
+      
+        function showApp() {
+          authContainer.style.display = "none";
+          userBar.style.display = "flex";
+          appContent.style.display = "block";
+          welcomeMsg.textContent = `Welcome, ${currentUser.name}!`;
+          displayReviews();
+        }
+      
+        function showAuth() {
+          authContainer.style.display = "block";
+          userBar.style.display = "none";
+          appContent.style.display = "none";
+        }
+      
+        function displayReviews() {
+          reviewsContainer.innerHTML = "";
+      
+          const text = searchText.value.trim().toLowerCase();
+          const ratingFilter = filterRating.value;
+          const categoryFilter = filterCategory.value;
+      
+          let filteredReviews = reviews.filter((r) => {
+            const matchesText =
+              r.text.toLowerCase().includes(text) ||
+              r.user.toLowerCase().includes(text);
+      
+            const matchesRating =
+              ratingFilter === "all" || r.rating === parseInt(ratingFilter);
+      
+            const matchesCategory =
+              categoryFilter === "all" || r.category === categoryFilter;
+      
+            return matchesText && matchesRating && matchesCategory;
+          });
+      
+          if (filteredReviews.length === 0) {
+            reviewsContainer.innerHTML = "<p>No reviews found.</p>";
+            return;
+          }
+      
+          filteredReviews.forEach((review) => {
+            const card = document.createElement("div");
+            card.className = "review-card";
+      
+            if (review.photo) {
+              const img = document.createElement("img");
+              img.src = review.photo;
+              img.alt = "Review photo";
+              img.className = "review-photo";
+              card.appendChild(img);
+            }
+      
+            const content = document.createElement("div");
+            content.className = "review-content";
+      
+            const header = document.createElement("div");
+            header.className = "review-header";
+      
+            const userSpan = document.createElement("span");
+            userSpan.className = "review-user";
+            userSpan.textContent = review.user;
+      
+            const ratingSpan = document.createElement("span");
+            ratingSpan.className = "review-rating";
+            ratingSpan.innerHTML = "★".repeat(review.rating);
+      
+            header.appendChild(userSpan);
+            header.appendChild(ratingSpan);
+      
+            const textP = document.createElement("p");
+            textP.className = "review-text";
+            textP.textContent = review.text;
+      
+            const dateP = document.createElement("p");
+            dateP.className = "review-date";
+            dateP.textContent = new Date(review.date).toLocaleString();
+      
+            content.appendChild(header);
+            content.appendChild(textP);
+            content.appendChild(dateP);
+      
+            const categoryBadge = document.createElement("div");
+            categoryBadge.className = `review-category category-${review.category}`;
+            categoryBadge.textContent = review.category;
+      
+            card.appendChild(content);
+            card.appendChild(categoryBadge);
+      
+            reviewsContainer.appendChild(card);
+          });
+        }
+      
+        loginForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const email = document.getElementById("login-email").value.trim();
+          const password = document.getElementById("login-password").value;
+      
+          const user = users.find(
+            (u) => u.email === email && u.password === hashPassword(password)
+          );
+      
+          if (user) {
+            currentUser = user;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+            loginError.textContent = "";
+            showApp();
+          } else {
+            loginError.textContent = "Invalid email or password.";
+          }
+        });
+      
+        registerForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("register-name").value.trim();
+          const email = document.getElementById("register-email").value.trim();
+          const password = document.getElementById("register-password").value;
+      
+          if (!name || !email || !password) {
+            registerError.textContent = "All fields are required.";
+            return;
+          }
+      
+          if (users.some((u) => u.email === email)) {
+            registerError.textContent = "Email already registered.";
+            return;
+          }
+      
+          const newUser = {
+            name,
+            email,
+            password: hashPassword(password),
+          };
+      
+          users.push(newUser);
+          localStorage.setItem(USERS_KEY, JSON.stringify(users));
+          currentUser = newUser;
+          localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      
+          registerError.textContent = "";
+          showApp();
+        });
+      
+        logoutBtn.addEventListener("click", () => {
+          currentUser = null;
+          localStorage.removeItem(SESSION_KEY);
+          showAuth();
+        });
+      
+        reviewForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+      
+          const reviewText = document.getElementById("review-text").value.trim();
+          const reviewRating = parseInt(
+            document.getElementById("review-rating").value
+          );
+          const reviewPhotoInput = document.getElementById("review-photo");
+      
+          if (!reviewText || !reviewRating) {
+            reviewError.textContent = "Please provide review text and rating.";
+            return;
+          }
+      
+          let category = "good";
+          if (reviewRating <= 2) {
+            category = "bad";
+          } else if (reviewRating === 3) {
+            category = "average";
+          }
+      
+          let photoUrl = "";
+      
+          if (reviewPhotoInput.files.length > 0) {
+            const file = reviewPhotoInput.files[0];
+            photoUrl = URL.createObjectURL(file);
+          }
+      
+          const newReview = {
+            user: currentUser.name,
+            text: reviewText,
+            rating: reviewRating,
+            category,
+            photo: photoUrl,
+            date: new Date().toISOString(),
+          };
+      
+          reviews.unshift(newReview);
+          localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+      
+          reviewForm.reset();
+          reviewError.textContent = "";
+      
+          displayReviews();
+        });
+      
+        // Toggle between login/register
+        showRegisterBtn.addEventListener("click", () => {
+          document.getElementById("login-section").style.display = "none";
+          document.getElementById("register-section").style.display = "block";
+          showRegisterBtn.style.display = "none";
+          showLoginBtn.style.display = "inline";
+        });
+      
+        showLoginBtn.addEventListener("click", () => {
+          document.getElementById("login-section").style.display = "block";
+          document.getElementById("register-section").style.display = "none";
+          showRegisterBtn.style.display = "inline";
+          showLoginBtn.style.display = "none";
+        });
+      
+        // Search and filter events
+        searchText.addEventListener("input", displayReviews);
+        filterRating.addEventListener("change", displayReviews);
+        filterCategory.addEventListener("change", displayReviews);
+      </script>
+      
+  </body>
+</html>
